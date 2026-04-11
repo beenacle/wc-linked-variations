@@ -1,0 +1,74 @@
+<?php
+/**
+ * Plugin Name: WC Linked Variations
+ * Plugin URI:  https://beenacle.com/wc-linked-variations
+ * Description: Link separate WooCommerce products together by shared attributes and display them as variable-product-style switchers.
+ * Version:     1.0.0
+ * Author:      Beenacle
+ * Author URI:  https://beenacle.com
+ * License:     GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: wc-linked-variations
+ * Domain Path: /languages
+ * Requires at least: 5.8
+ * Requires PHP: 7.4
+ * WC requires at least: 6.0
+ * WC tested up to: 9.0
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+define( 'WCLV_VERSION', '1.0.0' );
+define( 'WCLV_PLUGIN_FILE', __FILE__ );
+define( 'WCLV_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'WCLV_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'WCLV_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+
+/**
+ * Check that WooCommerce is active before bootstrapping.
+ */
+function wclv_check_woocommerce() {
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		add_action( 'admin_notices', function () {
+			echo '<div class="notice notice-error"><p>';
+			esc_html_e( 'WC Linked Variations requires WooCommerce to be installed and active.', 'wc-linked-variations' );
+			echo '</p></div>';
+		} );
+		return false;
+	}
+	return true;
+}
+
+/**
+ * Autoload plugin classes from the includes/ directory.
+ */
+spl_autoload_register( function ( $class ) {
+	$prefix = 'WCLV_';
+	if ( 0 !== strpos( $class, $prefix ) ) {
+		return;
+	}
+
+	$relative = substr( $class, strlen( $prefix ) );
+	$file     = WCLV_PLUGIN_DIR . 'includes/class-wclv-' . strtolower( str_replace( '_', '-', $relative ) ) . '.php';
+
+	if ( file_exists( $file ) ) {
+		require_once $file;
+	}
+} );
+
+register_activation_hook( __FILE__, array( 'WCLV_Activator', 'activate' ) );
+register_deactivation_hook( __FILE__, array( 'WCLV_Deactivator', 'deactivate' ) );
+
+add_action( 'plugins_loaded', function () {
+	if ( ! wclv_check_woocommerce() ) {
+		return;
+	}
+
+	WCLV_Post_Type::init();
+	WCLV_Admin_Meta::init();
+	WCLV_Ajax::init();
+	WCLV_Frontend::init();
+	WCLV_Shortcode::init();
+} );

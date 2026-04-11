@@ -1,0 +1,155 @@
+/* ── Container ─────────────────────────────────────────────────── */
+.wclv-linked-variations {
+	margin: 16px 0 20px;
+}
+
+.wclv-row {
+	margin-bottom: 14px;
+}
+
+.wclv-label {
+	display: block;
+	font-weight: 600;
+	font-size: 14px;
+	margin-bottom: 8px;
+	color: #333;
+}
+
+/* ── Button style ──────────────────────────────────────────────── */
+.wclv-options--buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.wclv-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	border: 2px solid #ddd;
+	border-radius: 4px;
+	background: #fff;
+	color: #333;
+	font-size: 14px;
+	line-height: 1.4;
+	text-decoration: none;
+	cursor: pointer;
+	transition: border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.wclv-btn:hover {
+	border-color: #333;
+	text-decoration: none;
+	color: #333;
+}
+
+.wclv-btn--active {
+	border-color: #333;
+	box-shadow: 0 0 0 1px #333;
+	cursor: default;
+	font-weight: 600;
+}
+
+.wclv-btn--disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
+	pointer-events: none;
+	text-decoration: line-through;
+}
+
+.wclv-btn__img {
+	width: 32px;
+	height: 32px;
+	object-fit: cover;
+	border-radius: 3px;
+}
+
+/* ── Dropdown style ────────────────────────────────────────────── */
+.wclv-options--dropdown {
+	max-width: 300px;
+}
+
+.wclv-select {
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 14px;
+	background: #fff;
+	color: #333;
+	cursor: pointer;
+}
+
+.wclv-select:focus {
+	border-color: #333;
+	outline: none;
+	box-shadow: 0 0 0 1px #333;
+}
+
+/* ── Image thumbnail style ─────────────────────────────────────── */
+.wclv-options--images {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.wclv-img-swatch {
+	display: inline-block;
+	width: 60px;
+	height: 60px;
+	border: 2px solid #ddd;
+	border-radius: 4px;
+	overflow: hidden;
+	transition: border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+	cursor: pointer;
+	text-decoration: none;
+}
+
+.wclv-img-swatch img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.wclv-img-swatch:hover {
+	border-color: #333;
+}
+
+.wclv-img-swatch--active {
+	border-color: #333;
+	box-shadow: 0 0 0 1px #333;
+	cursor: default;
+}
+
+.wclv-img-swatch--disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
+.wclv-img-swatch__label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	font-size: 11px;
+	text-align: center;
+	color: #666;
+	padding: 4px;
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+	.wclv-btn {
+		padding: 6px 12px;
+		font-size: 13px;
+	}
+
+	.wclv-img-swatch {
+		width: 48px;
+		height: 48px;
+	}
+}
