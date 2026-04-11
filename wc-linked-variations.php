@@ -26,6 +26,18 @@ define( 'WCLV_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WCLV_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'WCLV_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 
+require_once WCLV_PLUGIN_DIR . 'vendor/yahnis-elsts/plugin-update-checker/load-v5p6.php';
+
+use YahnisElsts\PluginUpdateChecker\v5p6\PucFactory;
+
+$wclvUpdateChecker = PucFactory::buildUpdateChecker(
+	'https://github.com/beenacle/wc-linked-variations/',
+	__FILE__,
+	'wc-linked-variations'
+);
+$wclvUpdateChecker->setBranch( 'main' );
+$wclvUpdateChecker->getVcsApi()->enableReleaseAssets();
+
 /**
  * Check that WooCommerce is active before bootstrapping.
  */
