@@ -89,4 +89,8 @@ add_action( 'plugins_loaded', function () {
 	WCLV_Ajax::init();
 	WCLV_Frontend::init();
 	WCLV_Shortcode::init();
+
+	if ( is_admin() ) {
+		WCLV_Import::init();
+	}
 } );
