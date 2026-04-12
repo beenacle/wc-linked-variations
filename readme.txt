@@ -2,11 +2,11 @@
 Contributors: beenacle
 Tags: woocommerce, linked products, variations, product linking, swatches
 Requires at least: 5.8
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.4
 WC requires at least: 6.0
-WC tested up to: 9.0
-Stable tag: 1.1.0
+WC tested up to: 10.6.2
+Stable tag: 1.1.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,10 @@ Yes. When creating a group, select multiple attributes and the plugin will rende
 Yes. Use the `[wclv_links]` shortcode inside any page builder element.
 
 == Changelog ==
+
+= 1.1.1 =
+* Move Iconic import tool from sidebar menu to auto-detecting admin notice
+* Update tested compatibility to WordPress 6.9 and WooCommerce 10.6.2
 
 = 1.1.0 =
 * Add import tool for Iconic WooCommerce Linked Variations (Products > Import from Iconic)

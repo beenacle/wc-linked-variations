@@ -6,20 +6,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class WCLV_Import {
 
-	public static function init() {
-		add_action( 'admin_menu', array( __CLASS__, 'add_menu_page' ), 20 );
-		add_action( 'admin_post_wclv_import_iconic', array( __CLASS__, 'handle_import' ) );
-	}
+	const DISMISSED_OPTION = 'wclv_iconic_import_dismissed';
 
-	public static function add_menu_page() {
-		add_submenu_page(
-			'edit.php?post_type=product',
-			__( 'Import Linked Variations', 'wc-linked-variations' ),
-			__( 'Import from Iconic', 'wc-linked-variations' ),
-			'manage_options',
-			'wclv-import',
-			array( __CLASS__, 'render_page' )
-		);
+	public static function init() {
+		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_notice' ) );
+		add_action( 'admin_post_wclv_import_iconic', array( __CLASS__, 'handle_import' ) );
+		add_action( 'admin_post_wclv_dismiss_iconic_import', array( __CLASS__, 'handle_dismiss' ) );
 	}
 
 	private static function iconic_tables_exist() {
@@ -40,69 +32,102 @@ class WCLV_Import {
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 	}
 
-	public static function render_page() {
-		$result = isset( $_GET['wclv_import_result'] ) ? sanitize_text_field( $_GET['wclv_import_result'] ) : '';
+	private static function is_our_cpt_screen() {
+		$screen = get_current_screen();
+		if ( ! $screen ) {
+			return false;
+		}
+		return $screen->post_type === WCLV_Post_Type::POST_TYPE;
+	}
+
+	public static function maybe_show_notice() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( ! self::is_our_cpt_screen() ) {
+			return;
+		}
+
+		if ( get_option( self::DISMISSED_OPTION ) ) {
+			return;
+		}
+
+		if ( ! self::iconic_tables_exist() ) {
+			return;
+		}
+
+		$count = self::get_iconic_group_count();
+		if ( 0 === $count ) {
+			return;
+		}
+
+		$result   = isset( $_GET['wclv_import_result'] ) ? sanitize_text_field( $_GET['wclv_import_result'] ) : '';
+		$imported = isset( $_GET['imported'] ) ? absint( $_GET['imported'] ) : 0;
+		$errors   = isset( $_GET['errors'] ) ? absint( $_GET['errors'] ) : 0;
+
+		if ( 'success' === $result ) {
+			?>
+			<div class="notice notice-success is-dismissible">
+				<p>
+					<?php
+					printf(
+						__( '<strong>Iconic Import Complete.</strong> %d group(s) imported, %d error(s).', 'wc-linked-variations' ),
+						$imported,
+						$errors
+					);
+					?>
+				</p>
+			</div>
+			<?php
+			return;
+		}
+
+		$import_url = wp_nonce_url(
+			admin_url( 'admin-post.php?action=wclv_import_iconic' ),
+			'wclv_import_iconic',
+			'wclv_import_nonce'
+		);
+
+		$dismiss_url = wp_nonce_url(
+			admin_url( 'admin-post.php?action=wclv_dismiss_iconic_import' ),
+			'wclv_dismiss_iconic_import',
+			'wclv_dismiss_nonce'
+		);
+
 		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'Import from Iconic WooCommerce Linked Variations', 'wc-linked-variations' ); ?></h1>
-
-			<?php if ( 'success' === $result ) : ?>
-				<div class="notice notice-success">
-					<p>
-						<?php
-						printf(
-							__( 'Import complete. %d group(s) imported, %d skipped, %d error(s).', 'wc-linked-variations' ),
-							isset( $_GET['imported'] ) ? absint( $_GET['imported'] ) : 0,
-							isset( $_GET['skipped'] ) ? absint( $_GET['skipped'] ) : 0,
-							isset( $_GET['errors'] ) ? absint( $_GET['errors'] ) : 0
-						);
-						?>
-					</p>
-				</div>
-			<?php elseif ( 'no_tables' === $result ) : ?>
-				<div class="notice notice-error">
-					<p><?php esc_html_e( 'Iconic plugin database tables were not found.', 'wc-linked-variations' ); ?></p>
-				</div>
-			<?php endif; ?>
-
-			<?php if ( ! self::iconic_tables_exist() ) : ?>
-				<div class="notice notice-warning inline">
-					<p>
-						<?php esc_html_e(
-							'Iconic WooCommerce Linked Variations data was not found in this database. The Iconic plugin must have been active on this site at some point for its tables to exist.',
-							'wc-linked-variations'
-						); ?>
-					</p>
-				</div>
-			<?php else : ?>
-				<?php $count = self::get_iconic_group_count(); ?>
-				<?php if ( 0 === $count ) : ?>
-					<p><?php esc_html_e( 'The Iconic tables exist but contain no linked variation groups.', 'wc-linked-variations' ); ?></p>
-				<?php else : ?>
-					<p>
-						<?php
-						printf(
-							__( 'Found <strong>%d</strong> linked variation group(s) in the Iconic plugin database. Click the button below to import them.', 'wc-linked-variations' ),
-							$count
-						);
-						?>
-					</p>
-					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-						<input type="hidden" name="action" value="wclv_import_iconic">
-						<?php wp_nonce_field( 'wclv_import_iconic', 'wclv_import_nonce' ); ?>
-						<p>
-							<button type="submit" class="button button-primary">
-								<?php printf( __( 'Import %d Group(s)', 'wc-linked-variations' ), $count ); ?>
-							</button>
-						</p>
-					</form>
-					<p class="description">
-						<?php esc_html_e( 'This will create new linked variation groups in WC Linked Variations. Existing groups will not be affected. You can safely run this multiple times, but duplicates will be created.', 'wc-linked-variations' ); ?>
-					</p>
-				<?php endif; ?>
-			<?php endif; ?>
+		<div class="notice notice-info">
+			<p>
+				<?php
+				printf(
+					__( '<strong>Iconic WooCommerce Linked Variations data detected.</strong> Found %d group(s) that can be imported into WC Linked Variations.', 'wc-linked-variations' ),
+					$count
+				);
+				?>
+			</p>
+			<p>
+				<a href="<?php echo esc_url( $import_url ); ?>" class="button button-primary">
+					<?php printf( __( 'Import %d Group(s)', 'wc-linked-variations' ), $count ); ?>
+				</a>
+				<a href="<?php echo esc_url( $dismiss_url ); ?>" class="button" style="margin-left: 8px;">
+					<?php esc_html_e( 'Dismiss', 'wc-linked-variations' ); ?>
+				</a>
+			</p>
 		</div>
 		<?php
+	}
+
+	public static function handle_dismiss() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( __( 'Unauthorized.', 'wc-linked-variations' ) );
+		}
+
+		check_admin_referer( 'wclv_dismiss_iconic_import', 'wclv_dismiss_nonce' );
+
+		update_option( self::DISMISSED_OPTION, 1 );
+
+		wp_safe_redirect( admin_url( 'edit.php?post_type=' . WCLV_Post_Type::POST_TYPE ) );
+		exit;
 	}
 
 	public static function handle_import() {
@@ -112,23 +137,14 @@ class WCLV_Import {
 
 		check_admin_referer( 'wclv_import_iconic', 'wclv_import_nonce' );
 
-		if ( ! self::iconic_tables_exist() ) {
-			wp_safe_redirect( add_query_arg( array(
-				'post_type'          => 'product',
-				'page'               => 'wclv-import',
-				'wclv_import_result' => 'no_tables',
-			), admin_url( 'edit.php' ) ) );
-			exit;
-		}
-
 		$result = self::run_import();
 
+		update_option( self::DISMISSED_OPTION, 1 );
+
 		wp_safe_redirect( add_query_arg( array(
-			'post_type'          => 'product',
-			'page'               => 'wclv-import',
+			'post_type'          => WCLV_Post_Type::POST_TYPE,
 			'wclv_import_result' => 'success',
 			'imported'           => $result['imported'],
-			'skipped'            => $result['skipped'],
 			'errors'             => $result['errors'],
 		), admin_url( 'edit.php' ) ) );
 		exit;
@@ -143,11 +159,10 @@ class WCLV_Import {
 		$rows = $wpdb->get_results( "SELECT * FROM {$iconic_table}" );
 
 		$imported = 0;
-		$skipped  = 0;
 		$errors   = 0;
 
 		if ( empty( $rows ) ) {
-			return compact( 'imported', 'skipped', 'errors' );
+			return compact( 'imported', 'errors' );
 		}
 
 		foreach ( $rows as $row ) {
@@ -230,6 +245,6 @@ class WCLV_Import {
 			$imported++;
 		}
 
-		return compact( 'imported', 'skipped', 'errors' );
+		return compact( 'imported', 'errors' );
 	}
 }
