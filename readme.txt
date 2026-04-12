@@ -6,7 +6,7 @@ Tested up to: 6.8
 Requires PHP: 7.4
 WC requires at least: 6.0
 WC tested up to: 9.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,11 @@ Yes. When creating a group, select multiple attributes and the plugin will rende
 Yes. Use the `[wclv_links]` shortcode inside any page builder element.
 
 == Changelog ==
+
+= 1.1.0 =
+* Add import tool for Iconic WooCommerce Linked Variations (Products > Import from Iconic)
+* Declare HPOS compatibility with WooCommerce
+* Add GitHub auto-update support
 
 = 1.0.0 =
 * Initial release
