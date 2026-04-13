@@ -52,7 +52,7 @@
 }
 
 .wclv-btn--disabled {
-	opacity: 0.35;
+	opacity: 0.5;
 	cursor: not-allowed;
 	pointer-events: none;
 	text-decoration: line-through;
@@ -124,7 +124,7 @@
 }
 
 .wclv-img-swatch--disabled {
-	opacity: 0.35;
+	opacity: 0.5;
 	cursor: not-allowed;
 	pointer-events: none;
 }
