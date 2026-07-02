@@ -6,7 +6,7 @@ Tested up to: 6.9
 Requires PHP: 7.4
 WC requires at least: 6.0
 WC tested up to: 10.6.2
-Stable tag: 1.1.1
+Stable tag: 1.2.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,17 @@ Yes. When creating a group, select multiple attributes and the plugin will rende
 Yes. Use the `[wclv_links]` shortcode inside any page builder element.
 
 == Changelog ==
+
+= 1.2.2 =
+* Product selection: the admin picker can now link draft, pending, scheduled and private products, not just published ones — each non-published product is labelled with its status so it's clear what you're selecting
+* Storefront: linked products are now shown only while published, keeping unpublished products out of the switcher (also fixes a previously-published product that was later unpublished still appearing to visitors)
+* Added `wclv_search_product_statuses` and `wclv_is_product_displayable` filters
+
+= 1.2.1 =
+* In-plugin self-updater: install updates straight from GitHub Releases via Dashboard → Updates
+
+= 1.2.0 =
+* Add automated GitHub Releases build-and-publish workflow
 
 = 1.1.1 =
 * Move Iconic import tool from sidebar menu to auto-detecting admin notice

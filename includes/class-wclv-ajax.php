@@ -23,9 +23,21 @@ class WCLV_Ajax {
 
 		$term = isset( $_GET['term'] ) ? sanitize_text_field( wp_unslash( $_GET['term'] ) ) : '';
 
+		/*
+		 * Offer any editable product to the admin — including drafts, pending,
+		 * scheduled and private — so groups can be assembled before everything
+		 * is live. Only `trash` and `auto-draft` are excluded. The storefront
+		 * still shows published products only (see WCLV_Frontend), so relaxing
+		 * the selection here cannot leak unpublished products to visitors.
+		 */
+		$statuses = apply_filters(
+			'wclv_search_product_statuses',
+			array( 'publish', 'pending', 'draft', 'future', 'private' )
+		);
+
 		$args = array(
 			'post_type'      => 'product',
-			'post_status'    => 'publish',
+			'post_status'    => $statuses,
 			'posts_per_page' => 30,
 			's'              => $term,
 			'fields'         => 'ids',
@@ -39,9 +51,17 @@ class WCLV_Ajax {
 			if ( ! $product ) {
 				continue;
 			}
+
+			$text   = sprintf( '%s (#%d)', $product->get_name(), $pid );
+			$status = get_post_status( $pid );
+			if ( 'publish' !== $status ) {
+				$status_obj = get_post_status_object( $status );
+				$text      .= ' — ' . ( $status_obj ? $status_obj->label : $status );
+			}
+
 			$results[] = array(
 				'id'   => $pid,
-				'text' => sprintf( '%s (#%d)', $product->get_name(), $pid ),
+				'text' => $text,
 			);
 		}
 
