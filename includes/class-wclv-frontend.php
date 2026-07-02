@@ -71,7 +71,7 @@ class WCLV_Frontend {
 		$products = array();
 		foreach ( $product_ids as $pid ) {
 			$p = wc_get_product( $pid );
-			if ( $p ) {
+			if ( $p && self::is_displayable( $p ) ) {
 				$products[ $pid ] = $p;
 			}
 		}
@@ -224,6 +224,28 @@ class WCLV_Frontend {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Whether a linked product may be surfaced on the storefront.
+	 *
+	 * Only published products are shown to visitors, matching the taxonomy
+	 * resolver (WCLV_Database::resolve_taxonomy_products) which queries
+	 * post_status => 'publish'. This keeps unpublished products — drafts,
+	 * private, scheduled — out of the switcher even when an admin selected
+	 * them in the backend, or when a previously-published product was later
+	 * unpublished.
+	 */
+	private static function is_displayable( $product ) {
+		$displayable = ( 'publish' === get_post_status( $product->get_id() ) );
+
+		/**
+		 * Filter whether a linked product is shown on the storefront.
+		 *
+		 * @param bool       $displayable Whether the product should render.
+		 * @param WC_Product $product     The linked product.
+		 */
+		return (bool) apply_filters( 'wclv_is_product_displayable', $displayable, $product );
 	}
 
 	/**
