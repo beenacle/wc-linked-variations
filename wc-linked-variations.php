@@ -68,6 +68,17 @@ add_action( 'before_woocommerce_init', function () {
 	}
 } );
 
+/**
+ * Load the plugin text domain.
+ *
+ * The plugin is distributed via GitHub rather than wordpress.org, so
+ * WordPress's automatic language-pack loading does not apply; bundled
+ * translations in /languages are loaded explicitly on init.
+ */
+add_action( 'init', function () {
+	load_plugin_textdomain( 'wc-linked-variations', false, dirname( WCLV_PLUGIN_BASENAME ) . '/languages' );
+} );
+
 register_activation_hook( __FILE__, array( 'WCLV_Activator', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'WCLV_Deactivator', 'deactivate' ) );
 

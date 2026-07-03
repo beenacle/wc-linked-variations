@@ -62,7 +62,7 @@ class WCLV_Import {
 			return;
 		}
 
-		$result   = isset( $_GET['wclv_import_result'] ) ? sanitize_text_field( $_GET['wclv_import_result'] ) : '';
+		$result   = isset( $_GET['wclv_import_result'] ) ? sanitize_text_field( wp_unslash( $_GET['wclv_import_result'] ) ) : '';
 		$imported = isset( $_GET['imported'] ) ? absint( $_GET['imported'] ) : 0;
 		$errors   = isset( $_GET['errors'] ) ? absint( $_GET['errors'] ) : 0;
 
@@ -70,11 +70,13 @@ class WCLV_Import {
 			?>
 			<div class="notice notice-success is-dismissible">
 				<p>
+					<strong><?php esc_html_e( 'Iconic Import Complete.', 'wc-linked-variations' ); ?></strong>
 					<?php
+					/* translators: 1: number of groups imported, 2: number of errors */
 					printf(
-						__( '<strong>Iconic Import Complete.</strong> %d group(s) imported, %d error(s).', 'wc-linked-variations' ),
-						$imported,
-						$errors
+						esc_html__( '%1$d group(s) imported, %2$d error(s).', 'wc-linked-variations' ),
+						(int) $imported,
+						(int) $errors
 					);
 					?>
 				</p>
@@ -98,16 +100,21 @@ class WCLV_Import {
 		?>
 		<div class="notice notice-info">
 			<p>
+				<strong><?php esc_html_e( 'Iconic WooCommerce Linked Variations data detected.', 'wc-linked-variations' ); ?></strong>
 				<?php
+				/* translators: %d: number of importable groups */
 				printf(
-					__( '<strong>Iconic WooCommerce Linked Variations data detected.</strong> Found %d group(s) that can be imported into WC Linked Variations.', 'wc-linked-variations' ),
-					$count
+					esc_html__( 'Found %d group(s) that can be imported into WC Linked Variations.', 'wc-linked-variations' ),
+					(int) $count
 				);
 				?>
 			</p>
 			<p>
 				<a href="<?php echo esc_url( $import_url ); ?>" class="button button-primary">
-					<?php printf( __( 'Import %d Group(s)', 'wc-linked-variations' ), $count ); ?>
+					<?php
+					/* translators: %d: number of importable groups */
+					printf( esc_html__( 'Import %d Group(s)', 'wc-linked-variations' ), (int) $count );
+					?>
 				</a>
 				<a href="<?php echo esc_url( $dismiss_url ); ?>" class="button" style="margin-left: 8px;">
 					<?php esc_html_e( 'Dismiss', 'wc-linked-variations' ); ?>
@@ -124,7 +131,7 @@ class WCLV_Import {
 
 		check_admin_referer( 'wclv_dismiss_iconic_import', 'wclv_dismiss_nonce' );
 
-		update_option( self::DISMISSED_OPTION, 1 );
+		update_option( self::DISMISSED_OPTION, 1, false );
 
 		wp_safe_redirect( admin_url( 'edit.php?post_type=' . WCLV_Post_Type::POST_TYPE ) );
 		exit;
@@ -139,7 +146,7 @@ class WCLV_Import {
 
 		$result = self::run_import();
 
-		update_option( self::DISMISSED_OPTION, 1 );
+		update_option( self::DISMISSED_OPTION, 1, false );
 
 		wp_safe_redirect( add_query_arg( array(
 			'post_type'          => WCLV_Post_Type::POST_TYPE,
@@ -175,7 +182,8 @@ class WCLV_Import {
 			}
 
 			if ( empty( $title ) ) {
-				$title = sprintf( __( 'Imported Group #%d', 'wc-linked-variations' ), $row->id );
+				/* translators: %d: source Iconic group ID */
+				$title = sprintf( __( 'Imported Group #%d', 'wc-linked-variations' ), (int) $row->id );
 			}
 
 			$new_post_id = wp_insert_post( array(

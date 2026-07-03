@@ -362,7 +362,7 @@ class WCLV_Frontend {
 				$html .= '</a>';
 			}
 
-			echo apply_filters( 'wclv_option_html', $html, $opt );
+			echo wp_kses_post( apply_filters( 'wclv_option_html', $html, $opt ) );
 		}
 		echo '</div>';
 	}
@@ -412,7 +412,7 @@ class WCLV_Frontend {
 			}
 			$html .= '</' . $tag . '>';
 
-			echo apply_filters( 'wclv_option_html', $html, $opt );
+			echo wp_kses_post( apply_filters( 'wclv_option_html', $html, $opt ) );
 		}
 		echo '</div>';
 	}
