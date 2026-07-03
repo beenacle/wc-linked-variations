@@ -3,7 +3,7 @@
  * Plugin Name: WC Linked Variations
  * Plugin URI:  https://github.com/beenacle/wc-linked-variations
  * Description: Link separate WooCommerce products together by shared attributes and display them as variable-product-style switchers.
- * Version:     1.2.2
+ * Version:     1.2.3
  * Author:      Beenacle
  * Author URI:  https://beenacle.com
  * License:     GPL-2.0-or-later
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'WCLV_VERSION', '1.2.2' );
+define( 'WCLV_VERSION', '1.2.3' );
 define( 'WCLV_PLUGIN_FILE', __FILE__ );
 define( 'WCLV_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WCLV_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
