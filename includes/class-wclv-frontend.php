@@ -226,22 +226,33 @@ class WCLV_Frontend {
 	}
 
 	/**
-	 * Read a term's ordering position, mirroring WooCommerce's storage.
+	 * Read a term's ordering position, honouring both WooCommerce-native and
+	 * plugin-driven term ordering.
 	 *
-	 * WooCommerce saves product-attribute term ordering in the term meta
-	 * "order_{taxonomy}" (see wc_set_term_order); other taxonomies use "order".
-	 * Terms without a stored position sort as 0.
+	 * WooCommerce core saves product-attribute term ordering in the term meta
+	 * "order_{taxonomy}" (see wc_set_term_order). Popular third-party term
+	 * ordering plugins (e.g. Post Types Order / Taxonomy Terms Order) instead
+	 * store the position under the generic "order" key — even for product
+	 * attributes. We therefore prefer the WooCommerce-native key and fall back
+	 * to "order" so custom ordering is respected regardless of who wrote it.
+	 * Terms without any stored position sort as 0.
 	 *
 	 * @param int    $term_id  The term ID.
 	 * @param string $taxonomy The taxonomy the term belongs to.
 	 * @return int
 	 */
 	private static function get_term_menu_order( $term_id, $taxonomy ) {
-		$meta_key = ( function_exists( 'taxonomy_is_product_attribute' ) && taxonomy_is_product_attribute( $taxonomy ) )
-			? 'order_' . $taxonomy
-			: 'order';
+		$is_product_attribute = function_exists( 'taxonomy_is_product_attribute' )
+			&& taxonomy_is_product_attribute( $taxonomy );
 
-		$order = get_term_meta( $term_id, $meta_key, true );
+		$order = '';
+		if ( $is_product_attribute ) {
+			$order = get_term_meta( $term_id, 'order_' . $taxonomy, true );
+		}
+
+		if ( ! is_numeric( $order ) ) {
+			$order = get_term_meta( $term_id, 'order', true );
+		}
 
 		return is_numeric( $order ) ? (int) $order : 0;
 	}

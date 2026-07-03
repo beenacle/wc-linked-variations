@@ -12,6 +12,25 @@ class WCLV_Post_Type {
 		add_action( 'init', array( __CLASS__, 'register' ) );
 		add_filter( 'manage_' . self::POST_TYPE . '_posts_columns', array( __CLASS__, 'admin_columns' ) );
 		add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( __CLASS__, 'admin_column_content' ), 10, 2 );
+		add_action( 'before_delete_post', array( __CLASS__, 'delete_group_data' ) );
+	}
+
+	/**
+	 * Remove a group's stored data when its post is permanently deleted.
+	 *
+	 * Wired to before_delete_post, which fires on permanent deletion but not
+	 * on trashing, so custom-table rows follow the post lifecycle instead of
+	 * orphaning. Trashed posts keep their row so a restore stays lossless.
+	 * Guarded to this post type because the hook fires for every post.
+	 *
+	 * @param int $post_id The post being deleted.
+	 */
+	public static function delete_group_data( $post_id ) {
+		if ( self::POST_TYPE !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		WCLV_Database::delete( $post_id );
 	}
 
 	public static function register() {

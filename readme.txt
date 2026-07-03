@@ -6,7 +6,7 @@ Tested up to: 6.9
 Requires PHP: 7.4
 WC requires at least: 6.0
 WC tested up to: 10.6.2
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,10 @@ Yes. When creating a group, select multiple attributes and the plugin will rende
 Yes. Use the `[wclv_links]` shortcode inside any page builder element.
 
 == Changelog ==
+
+= 1.2.4 =
+* Fix: variation selectors now respect custom term ordering created by third-party term-ordering plugins (e.g. Post Types Order / Taxonomy Terms Order), which store the position under the generic `order` term meta key. Term ordering is read from WooCommerce's native `order_{taxonomy}` key first and falls back to `order`, so both native and plugin-driven ordering are honoured
+* Fix: permanently deleting a linked-variation group now removes its stored data instead of leaving an orphaned row (wired to `before_delete_post`; trashing is unaffected so restores stay lossless)
 
 = 1.2.3 =
 * Variation selectors now respect WooCommerce's custom term ordering (menu order) instead of product order; can be toggled with the `wclv_respect_menu_order` filter
