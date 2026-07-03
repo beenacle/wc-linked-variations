@@ -22,3 +22,6 @@ $posts = get_posts( array(
 foreach ( $posts as $post_id ) {
 	wp_delete_post( $post_id, true );
 }
+
+// Plugin options.
+delete_option( 'wclv_iconic_import_dismissed' );

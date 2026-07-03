@@ -127,7 +127,7 @@ class WCLV_Frontend {
 	 * Build the array of selectable options for one attribute row.
 	 *
 	 * Each option:
-	 *   term_name, term_slug, product_id, url, is_active, in_stock, thumbnail_url
+	 *   term_name, term_slug, product_id, url, is_active, in_stock, thumbnail_url, menu_order
 	 */
 	private static function build_options( $attribute_slug, $all_attributes, $current_attrs, $products, $current_id ) {
 		$seen    = array();
@@ -170,12 +170,80 @@ class WCLV_Frontend {
 				'is_active'     => $is_active,
 				'in_stock'      => $in_stock,
 				'thumbnail_url' => $thumb_url ?: '',
+				'menu_order'    => self::get_term_menu_order( (int) $term->term_id, $attribute_slug ),
 			);
 
 			$seen[ $term->slug ] = true;
 		}
 
+		$options = self::sort_options_by_menu_order( $options, $attribute_slug );
+
 		return apply_filters( 'wclv_group_products', $options, $attribute_slug );
+	}
+
+	/**
+	 * Sort options by WooCommerce's custom term ordering (menu order).
+	 *
+	 * The sort is stable: options sharing a menu order (e.g. when no custom
+	 * ordering has been configured and every term reports 0) keep the relative
+	 * order in which they were discovered, preserving the previous behaviour.
+	 *
+	 * @param array  $options        Option rows, each carrying a 'menu_order' key.
+	 * @param string $attribute_slug The attribute taxonomy the options belong to.
+	 * @return array
+	 */
+	private static function sort_options_by_menu_order( $options, $attribute_slug ) {
+		/**
+		 * Filter whether linked options are ordered by WooCommerce's custom
+		 * term ordering. Return false to keep the product-driven order.
+		 *
+		 * @param bool   $respect        Whether to sort by menu order.
+		 * @param string $attribute_slug The attribute taxonomy.
+		 */
+		if ( count( $options ) < 2 || ! apply_filters( 'wclv_respect_menu_order', true, $attribute_slug ) ) {
+			return $options;
+		}
+
+		$position = 0;
+		foreach ( $options as &$option ) {
+			$option['_position'] = $position++;
+		}
+		unset( $option );
+
+		usort( $options, function ( $a, $b ) {
+			if ( $a['menu_order'] === $b['menu_order'] ) {
+				return $a['_position'] <=> $b['_position'];
+			}
+			return $a['menu_order'] <=> $b['menu_order'];
+		} );
+
+		foreach ( $options as &$option ) {
+			unset( $option['_position'] );
+		}
+		unset( $option );
+
+		return $options;
+	}
+
+	/**
+	 * Read a term's ordering position, mirroring WooCommerce's storage.
+	 *
+	 * WooCommerce saves product-attribute term ordering in the term meta
+	 * "order_{taxonomy}" (see wc_set_term_order); other taxonomies use "order".
+	 * Terms without a stored position sort as 0.
+	 *
+	 * @param int    $term_id  The term ID.
+	 * @param string $taxonomy The taxonomy the term belongs to.
+	 * @return int
+	 */
+	private static function get_term_menu_order( $term_id, $taxonomy ) {
+		$meta_key = ( function_exists( 'taxonomy_is_product_attribute' ) && taxonomy_is_product_attribute( $taxonomy ) )
+			? 'order_' . $taxonomy
+			: 'order';
+
+		$order = get_term_meta( $term_id, $meta_key, true );
+
+		return is_numeric( $order ) ? (int) $order : 0;
 	}
 
 	/**
@@ -294,7 +362,7 @@ class WCLV_Frontend {
 				$html .= '</a>';
 			}
 
-			echo apply_filters( 'wclv_option_html', $html, $opt );
+			echo wp_kses_post( apply_filters( 'wclv_option_html', $html, $opt ) );
 		}
 		echo '</div>';
 	}
@@ -344,7 +412,7 @@ class WCLV_Frontend {
 			}
 			$html .= '</' . $tag . '>';
 
-			echo apply_filters( 'wclv_option_html', $html, $opt );
+			echo wp_kses_post( apply_filters( 'wclv_option_html', $html, $opt ) );
 		}
 		echo '</div>';
 	}

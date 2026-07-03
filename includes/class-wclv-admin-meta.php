@@ -32,6 +32,12 @@ class WCLV_Admin_Meta {
 
 		wp_enqueue_script( 'jquery-ui-sortable' );
 
+		// WooCommerce registers the Select2 styling under the 'select2' handle;
+		// enqueue it so the pickers render styled on this non-WC screen.
+		if ( wp_style_is( 'select2', 'registered' ) ) {
+			wp_enqueue_style( 'select2' );
+		}
+
 		wp_enqueue_script(
 			'wclv-admin',
 			WCLV_PLUGIN_URL . 'assets/js/admin.js',
@@ -256,7 +262,7 @@ class WCLV_Admin_Meta {
 	/* ── Save ──────────────────────────────────────────────────────── */
 
 	public static function save( $post_id, $post ) {
-		if ( ! isset( $_POST['wclv_meta_nonce'] ) || ! wp_verify_nonce( $_POST['wclv_meta_nonce'], 'wclv_save_meta' ) ) {
+		if ( ! isset( $_POST['wclv_meta_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wclv_meta_nonce'] ) ), 'wclv_save_meta' ) ) {
 			return;
 		}
 
@@ -269,13 +275,13 @@ class WCLV_Admin_Meta {
 		}
 
 		$data = array(
-			'product_source' => isset( $_POST['wclv_product_source'] ) ? $_POST['wclv_product_source'] : 'manual',
-			'product_ids'    => isset( $_POST['wclv_product_ids'] ) ? $_POST['wclv_product_ids'] : array(),
-			'taxonomy'       => isset( $_POST['wclv_taxonomy'] ) ? $_POST['wclv_taxonomy'] : '',
-			'taxonomy_terms' => isset( $_POST['wclv_taxonomy_terms'] ) ? $_POST['wclv_taxonomy_terms'] : array(),
-			'attributes'     => isset( $_POST['wclv_attributes'] ) ? $_POST['wclv_attributes'] : array(),
+			'product_source' => isset( $_POST['wclv_product_source'] ) ? sanitize_text_field( wp_unslash( $_POST['wclv_product_source'] ) ) : 'manual',
+			'product_ids'    => isset( $_POST['wclv_product_ids'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['wclv_product_ids'] ) ) : array(),
+			'taxonomy'       => isset( $_POST['wclv_taxonomy'] ) ? sanitize_text_field( wp_unslash( $_POST['wclv_taxonomy'] ) ) : '',
+			'taxonomy_terms' => isset( $_POST['wclv_taxonomy_terms'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['wclv_taxonomy_terms'] ) ) : array(),
+			'attributes'     => isset( $_POST['wclv_attributes'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['wclv_attributes'] ) ) : array(),
 			'show_image'     => isset( $_POST['wclv_show_image'] ) ? 1 : 0,
-			'style'          => isset( $_POST['wclv_style'] ) ? $_POST['wclv_style'] : 'button',
+			'style'          => isset( $_POST['wclv_style'] ) ? sanitize_text_field( wp_unslash( $_POST['wclv_style'] ) ) : 'button',
 		);
 
 		WCLV_Database::save( $post_id, $data );

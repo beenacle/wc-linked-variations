@@ -6,7 +6,7 @@ Tested up to: 6.9
 Requires PHP: 7.4
 WC requires at least: 6.0
 WC tested up to: 10.6.2
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,10 @@ Yes. When creating a group, select multiple attributes and the plugin will rende
 Yes. Use the `[wclv_links]` shortcode inside any page builder element.
 
 == Changelog ==
+
+= 1.2.3 =
+* Variation selectors now respect WooCommerce's custom term ordering (menu order) instead of product order; can be toggled with the `wclv_respect_menu_order` filter
+* WordPress-native hardening: explicit text-domain loading on init, input unslashing at the save/import boundaries, `wp_kses_post()` on the filtered option markup, translator comments, Select2 stylesheet enqueued on the group screen, non-autoloaded dismissal flag, and complete option cleanup on uninstall
 
 = 1.2.2 =
 * Product selection: the admin picker can now link draft, pending, scheduled and private products, not just published ones — each non-published product is labelled with its status so it's clear what you're selecting

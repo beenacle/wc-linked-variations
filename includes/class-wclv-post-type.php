@@ -68,13 +68,15 @@ class WCLV_Post_Type {
 			case 'wclv_products':
 				if ( 'taxonomy' === $group->product_source ) {
 					$terms = maybe_unserialize( $group->taxonomy_terms );
+					/* translators: 1: taxonomy slug wrapped in <code>, 2: number of terms */
 					printf(
-						__( 'Via %s (%d terms)', 'wc-linked-variations' ),
+						__( 'Via %1$s (%2$d terms)', 'wc-linked-variations' ),
 						'<code>' . esc_html( $group->taxonomy ) . '</code>',
 						is_array( $terms ) ? count( $terms ) : 0
 					);
 				} else {
 					$ids = maybe_unserialize( $group->product_ids );
+					/* translators: %d: number of products in the group */
 					printf( _n( '%d product', '%d products', is_array( $ids ) ? count( $ids ) : 0, 'wc-linked-variations' ), is_array( $ids ) ? count( $ids ) : 0 );
 				}
 				break;
